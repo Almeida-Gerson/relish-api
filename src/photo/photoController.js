@@ -80,7 +80,7 @@ const getPhotos = async (req, res, next) => {
     // Apply pagination
     const paginatedPhotos = filteredPhotos.slice(offset, offset + limit);
 
-    const data = { photos: paginatedPhotos, total: photos?.length };
+    const data = { photos: paginatedPhotos, total: filteredPhotos?.length };
     // Setting cache value
     cache.set(cacheKey, data);
 
