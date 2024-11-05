@@ -1,13 +1,10 @@
+const NodeCache = require("node-cache");
 const photoService = require("./photoService");
+const cache = new NodeCache({ stdTTL: 100, checkperiod: 300 });
 
 // Get paginated photos based on filters sent by the user
 const getPhotos = async (req, res, next) => {
   try {
-    // Fetch all data
-    const users = await photoService.getUsers();
-    const albums = await photoService.getAlbums();
-    const photos = await photoService.getPhotos();
-
     // Parse query parameters for filtering and pagination
     const titleFilter = req.query.title || undefined;
     const albumTitleFilter = req.query["album.title"] || undefined;
@@ -16,6 +13,23 @@ const getPhotos = async (req, res, next) => {
     // Pagination parameters
     const limit = parseInt(req.query.limit) || 25;
     const offset = parseInt(req.query.offset) || 0;
+
+    const cacheKey = `photos__titleFilter${titleFilter ?? ""}_albumTitleFilter${
+      albumTitleFilter ?? ""
+    }_userEmailFilter${userEmailFilter ?? ""}_limit${limit}_offset${offset}`;
+
+    // Getting a cache value
+    const cachedPhotos = cache.get(cacheKey);
+
+    if (cachedPhotos) {
+      res.status(200).json(cachedPhotos);
+      return;
+    }
+
+    // Fetch all data
+    const users = await photoService.getUsers();
+    const albums = await photoService.getAlbums();
+    const photos = await photoService.getPhotos();
 
     // Enrich photos with album and user information
     const enrichedPhotos = photos.map((photo) => {
@@ -63,6 +77,8 @@ const getPhotos = async (req, res, next) => {
     // Apply pagination
     const paginatedPhotos = filteredPhotos.slice(offset, offset + limit);
 
+    cache.set(cacheKey, paginatedPhotos);
+
     res.status(200).json(paginatedPhotos);
   } catch (error) {
     next(error); // Pass error to the error handler
@@ -75,6 +91,16 @@ const getPhoto = async (req, res, next) => {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
       res.status(200).json(null);
+    }
+
+    const cacheKey = `photo__id${id}`;
+
+    // Getting a cache value
+    const cachedPhoto = cache.get(cacheKey);
+
+    if (cachedPhoto) {
+      res.status(200).json(cachedPhoto);
+      return;
     }
 
     // Fetch all data
@@ -97,6 +123,7 @@ const getPhoto = async (req, res, next) => {
       },
     };
 
+    cache.set(cacheKey, enrichedPhoto);
     res.status(200).json(enrichedPhoto);
   } catch (error) {
     next(error); // Pass error to the error handler
