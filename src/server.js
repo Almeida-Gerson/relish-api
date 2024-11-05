@@ -1,17 +1,4 @@
-const express = require("express");
-const cors = require("cors");
-const photoRoutes = require("./photo/photoRoutes");
-const errorHandler = require("./middlewares/errorHandler");
-
-const app = express();
-app.use(cors());
-app.use(express.json()); // Parse JSON bodies
-
-// Routes
-app.use("/externalapi", photoRoutes);
-
-// Error Handling middleware
-app.use(errorHandler);
+const app = require("../netlify/functions/api");
 
 // Run the server
 app.listen(3000, () => {
