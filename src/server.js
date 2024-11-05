@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const photoRoutes = require("./routes/photoRoutes");
+const photoRoutes = require("./photo/photoRoutes");
 const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
