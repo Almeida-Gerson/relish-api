@@ -1,26 +1,12 @@
-const express = require("express");
-const cors = require('cors')
-const axios = require("axios");
+const photoService = require("../services/photoService");
 
-const app = express();
-
-const fetchData = async (endpoint, params) => {
-  const response = await axios.get(endpoint, { params });
-  return response.data;
-};
-
-app.use(cors())
-
-app.get("/externalapi/photos", async (req, res) => {
+// Get paginated photos based on filters sent by the user
+const getPhotos = async (req, res, next) => {
   try {
     // Fetch all data
-    const users = await fetchData("https://jsonplaceholder.typicode.com/users");
-    const albums = await fetchData(
-      "https://jsonplaceholder.typicode.com/albums"
-    );
-    const photos = await fetchData(
-      "https://jsonplaceholder.typicode.com/photos"
-    );
+    const users = await photoService.getUsers();
+    const albums = await photoService.getAlbums();
+    const photos = await photoService.getPhotos();
 
     // Parse query parameters for filtering and pagination
     const titleFilter = req.query.title || undefined;
@@ -77,35 +63,29 @@ app.get("/externalapi/photos", async (req, res) => {
     // Apply pagination
     const paginatedPhotos = filteredPhotos.slice(offset, offset + limit);
 
-    res.json(paginatedPhotos);
+    res.status(200).json(paginatedPhotos);
   } catch (error) {
-    console.log("🚀 ~ app.get ~ error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error); // Pass error to the error handler
   }
-});
+};
 
-app.get("/externalapi/photos/:id", async (req, res) => {
+// Get photos based on id sent by the user
+const getPhoto = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
-      throw new Error("Id is required");
+      res.status(200).json(null);
     }
 
     // Fetch all data
-    const photos = await fetchData(
-      "https://jsonplaceholder.typicode.com/photos",
-      { id: req.params.id }
-    );
-    const albums = await fetchData(
-      "https://jsonplaceholder.typicode.com/albums",
-      { id: photos?.[0]?.albumId }
-    );
-    const users = await fetchData(
-      "https://jsonplaceholder.typicode.com/users",
-      {
-        id: albums?.[0]?.userId,
-      }
-    );
+    const photos = await photoService.getPhotos({
+      id: req.params.id,
+    });
+    const albums = await photoService.getAlbums({ id: photos?.[0]?.albumId });
+
+    const users = await photoService.getUsers({
+      id: albums?.[0]?.userId,
+    });
 
     // Enrich photo with album and user information
     const enrichedPhoto = {
@@ -117,13 +97,13 @@ app.get("/externalapi/photos/:id", async (req, res) => {
       },
     };
 
-    res.json(enrichedPhoto);
+    res.status(200).json(enrichedPhoto);
   } catch (error) {
-    console.log("🚀 ~ app.get ~ error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error); // Pass error to the error handler
   }
-});
+};
 
-app.listen(3000, () => {
-  console.log(`Server is running on http://localhost:3000`);
-});
+module.exports = {
+  getPhotos,
+  getPhoto,
+};
