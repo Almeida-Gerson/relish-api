@@ -36,6 +36,9 @@ const getPhotos = async (req, res, next) => {
       const album = albums.find((album) => album.id === photo.albumId);
       const user = users.find((user) => user.id === album.userId);
 
+      // Remove albumId property
+      delete photo?.albumId;
+
       return {
         ...photo,
         album: { id: album?.id, title: album?.title, user },
@@ -77,9 +80,11 @@ const getPhotos = async (req, res, next) => {
     // Apply pagination
     const paginatedPhotos = filteredPhotos.slice(offset, offset + limit);
 
-    cache.set(cacheKey, paginatedPhotos);
+    const data = { photos: paginatedPhotos, total: photos?.length };
+    // Setting cache value
+    cache.set(cacheKey, data);
 
-    res.status(200).json(paginatedPhotos);
+    res.status(200).json(data);
   } catch (error) {
     next(error); // Pass error to the error handler
   }
@@ -113,6 +118,9 @@ const getPhoto = async (req, res, next) => {
       id: albums?.[0]?.userId,
     });
 
+    // Remove albumId property
+    delete photo?.[0]?.albumId;
+
     // Enrich photo with album and user information
     const enrichedPhoto = {
       ...photos?.[0],
@@ -123,6 +131,7 @@ const getPhoto = async (req, res, next) => {
       },
     };
 
+    // Setting cache value
     cache.set(cacheKey, enrichedPhoto);
     res.status(200).json(enrichedPhoto);
   } catch (error) {
