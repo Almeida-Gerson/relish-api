@@ -6,3 +6,4 @@
   from = "/externalapi/*"
   status = 200
   to = "/.netlify/functions/externalapi/:splat"
+  

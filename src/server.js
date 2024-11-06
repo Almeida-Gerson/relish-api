@@ -1,4 +1,4 @@
-const app = require("../netlify/functions/api");
+const app = require("../netlify/functions/externalapi");
 
 // Run the server
 app.listen(3000, () => {
