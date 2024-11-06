@@ -36,8 +36,8 @@ Launches the test runner
 Builds the netlify app for production to the `.netlify` folder.\
 
 ## Demo
-https://relish-api.netlify.app/externalapi/photos
-https://relish-api.netlify.app/externalapi/photos/1
+- https://relish-api.netlify.app/externalapi/photos
+- https://relish-api.netlify.app/externalapi/photos/1
 
 ### Tools Used
 
