@@ -119,7 +119,7 @@ const getPhoto = async (req, res, next) => {
     });
 
     // Remove albumId property
-    delete photo?.[0]?.albumId;
+    delete photos?.[0]?.albumId;
 
     // Enrich photo with album and user information
     const enrichedPhoto = {
