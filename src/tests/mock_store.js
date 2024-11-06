@@ -1,5 +1,4 @@
 const mock_photo = {
-  albumId: 1,
   id: 1,
   title: "accusamus beatae ad facilis cum similique qui sunt",
   url: "https://via.placeholder.com/600/92c952",
@@ -33,6 +32,6 @@ const mock_photo = {
   },
 };
 
-const mock_photos = [mock_photo];
+const mock_photos = { photos: [mock_photo], total: 1 };
 
 module.exports = { mock_photo, mock_photos };
