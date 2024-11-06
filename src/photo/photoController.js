@@ -1,5 +1,6 @@
 const NodeCache = require("node-cache");
 const photoService = require("./photoService");
+const { LIMIT, OFFSET } = require("../constants");
 const cache = new NodeCache({ stdTTL: 100, checkperiod: 300 });
 
 // Get paginated photos based on filters sent by the user
@@ -11,8 +12,8 @@ const getPhotos = async (req, res, next) => {
     const userEmailFilter = req.query["album.user.email"] || undefined;
 
     // Pagination parameters
-    const limit = parseInt(req.query.limit) || 25;
-    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || LIMIT;
+    const offset = parseInt(req.query.offset) || OFFSET;
 
     const cacheKey = `photos__titleFilter${titleFilter ?? ""}_albumTitleFilter${
       albumTitleFilter ?? ""
@@ -69,7 +70,12 @@ const getPhotos = async (req, res, next) => {
         }
 
         // Filter by email
-        if (userEmailFilter && photo.album.user?.email !== userEmailFilter) {
+        if (
+          userEmailFilter &&
+          !photo.album.user?.email
+            ?.toLowerCase()
+            .includes(userEmailFilter?.toLowerCase())
+        ) {
           return false;
         }
 
