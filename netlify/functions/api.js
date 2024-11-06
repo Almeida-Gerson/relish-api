@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json()); // Parse JSON bodies
 
 // Routes
-app.use("/externalapi", photoRoutes);
+app.use("/.netlify/functions/externalapi", photoRoutes);
 
 // Error Handling middleware
 app.use(errorHandler);
