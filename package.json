@@ -4,13 +4,14 @@
   "description": "Relish API",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "jest src/tests",
-    "build": "netlify build"
+    "start": "dotenvx run -f .env.development -- node src/server.js",
+    "test": "dotenvx run -f .env.testing -- jest src/tests",
+    "build": "dotenvx run -f .env.production -- netlify build"
   },
   "author": "Gerson Almeida",
   "license": "ISC",
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.22.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "express": "^4.21.1",

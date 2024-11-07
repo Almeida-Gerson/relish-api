@@ -24,7 +24,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the api in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.(this port can be changed using environment variables)
 
 
 ### `npm test`
@@ -39,6 +39,14 @@ Builds the netlify app for production to the `.netlify` folder.\
 - https://relish-api.netlify.app/externalapi/photos
 - https://relish-api.netlify.app/externalapi/photos/1
 
+## Environment Variables
+
+Within each file(`.env.development`, `.env.production`, `.env.testing`) will include environment variables.
+
+Of note:
+
+-   `SERVER_PORT` will be used as the port used to run the app
+
 ### Tools Used
 
 - axios
@@ -49,6 +57,7 @@ Builds the netlify app for production to the `.netlify` folder.\
 - jest
 - netlify-cli
 - supertest
+- dotenvx
 
 ### Deployment
 

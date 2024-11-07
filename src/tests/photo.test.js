@@ -1,7 +1,9 @@
+require("@dotenvx/dotenvx").config();
 const request = require("supertest");
+const app = require("../server");
 const { mock_photo, mock_photos } = require("./mock_store");
 
-const requestInstance = request("http://localhost:3000");
+const requestInstance = request(app);
 
 describe("GET /externalapi/photos", () => {
   it("should return a list of photos", async () => {
