@@ -7,9 +7,11 @@ const cache = new NodeCache({ stdTTL: 100, checkperiod: 300 });
 const getPhotos = async (req, res, next) => {
   try {
     // Parse query parameters for filtering and pagination
-    const titleFilter = req.query.title || undefined;
-    const albumTitleFilter = req.query["album.title"] || undefined;
-    const userEmailFilter = req.query["album.user.email"] || undefined;
+    const {
+      title: titleFilter,
+      "album.title": albumTitleFilter,
+      "album.user.email": userEmailFilter,
+    } = req.query || {};
 
     // Pagination parameters
     const limit = parseInt(req.query.limit) || LIMIT;
@@ -38,10 +40,10 @@ const getPhotos = async (req, res, next) => {
       const user = users.find((user) => user.id === album.userId);
 
       // Remove albumId property
-      delete photo?.albumId;
+      const { albumId, ...newPhoto } = photo;
 
       return {
-        ...photo,
+        ...newPhoto,
         album: { id: album?.id, title: album?.title, user },
       };
     });
@@ -99,8 +101,9 @@ const getPhotos = async (req, res, next) => {
 // Get photos based on id sent by the user
 const getPhoto = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (Number.isNaN(id)) {
+    const id = Number(req.params.id);
+    if (!id) {
+      // Returns null if an invalid number is received
       res.status(200).json(null);
     }
 
@@ -118,22 +121,26 @@ const getPhoto = async (req, res, next) => {
     const photos = await photoService.getPhotos({
       id: req.params.id,
     });
-    const albums = await photoService.getAlbums({ id: photos?.[0]?.albumId });
-
+    const [firstPhoto] = photos || [];
+    const { albumId: firstPhotoAlbumId } = firstPhoto || {};
+    const albums = await photoService.getAlbums({ id: firstPhotoAlbumId });
+    const [firstAlbum] = albums || [];
+    const { userId, title: albumTitle } = firstAlbum || {};
     const users = await photoService.getUsers({
-      id: albums?.[0]?.userId,
+      id: userId,
     });
+    const [firstUser] = users || [];
 
     // Remove albumId property
-    delete photos?.[0]?.albumId;
+    const { albumId, ...photo } = firstPhoto || {};
 
     // Enrich photo with album and user information
     const enrichedPhoto = {
-      ...photos?.[0],
+      ...photo,
       album: {
-        id: albums?.[0]?.id,
-        title: albums?.[0]?.title,
-        user: users?.[0],
+        id: firstPhotoAlbumId,
+        title: albumTitle,
+        user: firstUser,
       },
     };
 
