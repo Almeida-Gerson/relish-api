@@ -87,7 +87,12 @@ const paginatePhotos = (
   const { limit, offset } = filters || {};
 
   // Apply pagination
-  const paginatedPhotos = photos?.slice(offset, offset + limit);
+  const startIndex = offset;
+  const endIndex = offset + limit;
+  // Do not include endIndex because array index start in 0
+  const paginatedPhotos = photos?.filter(
+    (_, index) => index >= startIndex && index < endIndex
+  );
 
   const data = { photos: paginatedPhotos, total: photos?.length };
 
