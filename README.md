@@ -24,7 +24,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the api in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.(this port can be changed using environment variables)
+Open [http://localhost:3000/externalapi/photos](http://localhost:3000/externalapi/photos) to test it.(this port can be changed using environment variables)
 
 
 ### `npm test`
