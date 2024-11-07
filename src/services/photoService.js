@@ -115,51 +115,23 @@ const getPhotos = async (
     offset: OFFSET,
   }
 ) => {
-  try {
-    // Parse query parameters for filtering and pagination
-    const {
-      title,
-      "album.title": albumTitle,
-      "album.user.email": userEmail,
-      limit,
-      offset,
-    } = filters || {};
+  // Parse query parameters for filtering and pagination
+  const {
+    title,
+    "album.title": albumTitle,
+    "album.user.email": userEmail,
+    limit,
+    offset,
+  } = filters || {};
 
-    const cacheKey = "enrichedPhotos";
+  const cacheKey = "enrichedPhotos";
 
-    // Getting a cache value
-    const cachedPhotos = cache.get(cacheKey);
+  // Getting a cache value
+  const cachedPhotos = cache.get(cacheKey);
 
-    if (cachedPhotos) {
-      // Filter based on the provided query parameters
-      const filteredPhotos = filterPhotos(cachedPhotos, {
-        title,
-        albumTitle,
-        userEmail,
-      });
-
-      // Apply pagination
-      const data = paginatePhotos(filteredPhotos, {
-        limit,
-        offset,
-      });
-
-      return data;
-    }
-
-    // Fetch all data
-    const users = await getUsersService();
-    const albums = await getAlbumsService();
-    const photos = await getPhotosService();
-
-    // Enrich photos with album and user information
-    const enrichedPhotos = enrichPhotos(photos, albums, users);
-
-    // Setting cache value
-    cache.set(cacheKey, enrichedPhotos);
-
+  if (cachedPhotos) {
     // Filter based on the provided query parameters
-    const filteredPhotos = filterPhotos(enrichedPhotos, {
+    const filteredPhotos = filterPhotos(cachedPhotos, {
       title,
       albumTitle,
       userEmail,
@@ -172,64 +144,103 @@ const getPhotos = async (
     });
 
     return data;
-  } catch (error) {
-    throw error; // Pass error to the error handler
   }
+
+  // Fetch all data
+  const requests = [getUsersService(), getAlbumsService(), getPhotosService()];
+
+  const responses = await Promise.all(requests);
+  const [users, albums, photos] = responses;
+
+  // Enrich photos with album and user information
+  const enrichedPhotos = enrichPhotos(photos, albums, users);
+
+  // Setting cache value
+  cache.set(cacheKey, enrichedPhotos);
+
+  // Filter based on the provided query parameters
+  const filteredPhotos = filterPhotos(enrichedPhotos, {
+    title,
+    albumTitle,
+    userEmail,
+  });
+
+  // Apply pagination
+  const data = paginatePhotos(filteredPhotos, {
+    limit,
+    offset,
+  });
+
+  return data;
 };
 
 // Get photos based on id sent by the user
 const getPhoto = async (photoId) => {
-  try {
-    const id = Number(photoId);
-    if (!id) {
-      // Returns null if an invalid number is received
-      return null;
-    }
-
-    const cacheKey = `photo__id${id}`;
-
-    // Getting a cache value
-    const cachedPhotos = cache.get(cacheKey);
-
-    if (cachedPhotos) {
-      return cachedPhotos;
-    }
-
-    // Fetch all data
-    const photos = await getPhotosService({
-      id,
-    });
-    const [firstPhoto] = photos || [];
-    const { albumId: firstPhotoAlbumId } = firstPhoto || {};
-    const albums = await getAlbumsService({
-      id: firstPhotoAlbumId,
-    });
-    const [firstAlbum] = albums || [];
-    const { userId, title: albumTitle } = firstAlbum || {};
-    const users = await getUsersService({
-      id: userId,
-    });
-    const [firstUser] = users || [];
-
-    // Remove albumId property
-    const { albumId, ...photo } = firstPhoto || {};
-
-    // Enrich photo with album and user information
-    const enrichedPhoto = {
-      ...photo,
-      album: {
-        id: firstPhotoAlbumId,
-        title: albumTitle,
-        user: firstUser,
-      },
-    };
-
-    // Setting cache value
-    cache.set(cacheKey, enrichedPhoto);
-    return enrichedPhoto;
-  } catch (error) {
-    throw error; // Pass error to the error handler
+  const id = Number(photoId);
+  if (!id) {
+    // Returns null if an invalid number is received
+    return null;
   }
+
+  const cacheKey = `photo__id${id}`;
+
+  // Getting a cache value
+  const cachedPhotos = cache.get(cacheKey);
+
+  if (cachedPhotos) {
+    return cachedPhotos;
+  }
+
+  // Fetch all data
+  const photos = await getPhotosService({
+    id,
+  });
+
+  if (!photos?.length) {
+    // Pass error to the error handler
+    throw new Error("Not photo found");
+  }
+
+  const [firstPhoto] = photos || [];
+  const { albumId: firstPhotoAlbumId } = firstPhoto || {};
+  const albums = await getAlbumsService({
+    id: firstPhotoAlbumId,
+  });
+
+  if (!albums?.length) {
+    // Pass error to the error handler
+    throw new Error("Not album found");
+  }
+
+  const [firstAlbum] = albums || [];
+  const { userId, title: albumTitle } = firstAlbum || {};
+  const users = await getUsersService({
+    id: userId,
+  });
+
+  if (!users?.length) {
+    // Pass error to the error handler
+    throw new Error("Not user found");
+  }
+
+  const [firstUser] = users || [];
+
+  // Remove albumId property
+  const { albumId, ...photo } = firstPhoto || {};
+
+  // Enrich photo with album and user information
+  const enrichedPhoto = {
+    ...photo,
+    album: {
+      id: firstPhotoAlbumId,
+      title: albumTitle,
+      user: firstUser,
+    },
+  };
+
+  // Setting cache value
+  cache.set(cacheKey, enrichedPhoto);
+  return enrichedPhoto;
 };
 
 module.exports = { getPhotos, getPhoto };
