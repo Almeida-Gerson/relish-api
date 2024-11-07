@@ -1,7 +1,7 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const cors = require("cors");
-const photoRoutes = require("../../src/photo/photoRoutes");
+const photoRoutes = require("../../src/routes/photoRoutes");
 const errorHandler = require("../../src/middlewares/errorHandler");
 
 const app = express();

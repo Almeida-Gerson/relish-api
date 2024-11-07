@@ -1,7 +1,7 @@
 const {
   getPhotos: getPhotosService,
   getPhoto: getPhotoService,
-} = require("./photoService");
+} = require("../services/photoService");
 
 // Get paginated photos based on filters sent by the user
 const getPhotos = async (req, res, next) => {
