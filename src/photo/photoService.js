@@ -85,10 +85,16 @@ const paginatePhotos = (
   filters = { offset: OFFSET, limit: LIMIT }
 ) => {
   const { limit, offset } = filters || {};
+  const parsedLimit = Number.isNaN(parseInt(limit, 10))
+    ? LIMIT
+    : parseInt(limit, 10);
+  const parsedOffset = Number.isNaN(parseInt(offset, 10))
+    ? OFFSET
+    : parseInt(offset, 10);
 
   // Apply pagination
-  const startIndex = offset;
-  const endIndex = offset + limit;
+  const startIndex = parsedOffset;
+  const endIndex = parsedOffset + parsedLimit;
   // Do not include endIndex because array index start in 0
   const paginatedPhotos = photos?.filter(
     (_, index) => index >= startIndex && index < endIndex
@@ -119,10 +125,6 @@ const getPhotos = async (
       offset,
     } = filters || {};
 
-    // Pagination parameters
-    const parsedLimit = parseInt(limit, 10);
-    const parsedOffset = parseInt(offset, 10);
-
     const cacheKey = "enrichedPhotos";
 
     // Getting a cache value
@@ -138,8 +140,8 @@ const getPhotos = async (
 
       // Apply pagination
       const data = paginatePhotos(filteredPhotos, {
-        limit: parsedLimit,
-        offset: parsedOffset,
+        limit,
+        offset,
       });
 
       return data;
@@ -165,8 +167,8 @@ const getPhotos = async (
 
     // Apply pagination
     const data = paginatePhotos(filteredPhotos, {
-      limit: parsedLimit,
-      offset: parsedOffset,
+      limit,
+      offset,
     });
 
     return data;
