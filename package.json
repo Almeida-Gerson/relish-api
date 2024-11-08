@@ -6,7 +6,7 @@
   "scripts": {
     "start": "dotenvx run -f .env.development -- ts-node src/server.ts",
     "test": "dotenvx run -f .env.testing -- jest tests",
-    "build": "dotenvx run -f .env.production -- netlify build"
+    "build": "dotenvx run -f .env.production -- npm run test && netlify build"
   },
   "author": "Gerson Almeida",
   "license": "ISC",
