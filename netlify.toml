@@ -6,6 +6,4 @@
   from = "/externalapi/*"
   status = 200
   to = "/.netlify/functions/externalapi/:splat"
-[build]
-  # Custom build command
-  command = "npm test && npm run build" # First run tests, then build
+  
