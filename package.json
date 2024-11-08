@@ -15,8 +15,10 @@
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "express": "^4.21.1",
+    "express-validator": "^7.2.0",
     "node-cache": "^5.1.2",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@netlify/functions": "^2.8.2",

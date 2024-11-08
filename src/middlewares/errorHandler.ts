@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 
 const errorHandler = (err: Error, _: Request, res: Response) => {
   console.log("🚀 ~ errorHandler ~ err:", err);
