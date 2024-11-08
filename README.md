@@ -58,6 +58,7 @@ Of note:
 - netlify-cli
 - supertest
 - dotenvx
+- typescript
 
 ### Deployment
 

@@ -1,5 +1,7 @@
-require("@dotenvx/dotenvx").config();
-const app = require("../netlify/functions/externalapi");
+import { config } from "@dotenvx/dotenvx";
+import app from "../netlify/functions/externalapi";
+
+config();
 
 // Run the server
 app.listen(process.env.SERVER_PORT, () => {
@@ -8,4 +10,4 @@ app.listen(process.env.SERVER_PORT, () => {
   );
 });
 
-module.exports = app;
+export default app;

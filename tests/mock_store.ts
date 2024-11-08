@@ -1,4 +1,6 @@
-const mock_photo = {
+import { Photo, PhotoResponse } from "../src/types/photos";
+
+export const mock_photo: Photo = {
   id: 1,
   title: "accusamus beatae ad facilis cum similique qui sunt",
   url: "https://via.placeholder.com/600/92c952",
@@ -32,6 +34,4 @@ const mock_photo = {
   },
 };
 
-const mock_photos = { photos: [mock_photo], total: 1 };
-
-module.exports = { mock_photo, mock_photos };
+export const mock_photos: PhotoResponse = { photos: [mock_photo], total: 1 };

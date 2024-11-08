@@ -1,6 +1,7 @@
-const NodeCache = require("node-cache");
-const axios = require("axios");
-const { OFFSET, LIMIT } = require("../constants");
+import NodeCache from "node-cache";
+import axios from "axios";
+import { OFFSET, LIMIT } from "../constants";
+import { Album, Photo, PhotoResponse, User } from "../types/photos";
 
 const cache = new NodeCache({ stdTTL: 100, checkperiod: 300 });
 
@@ -8,26 +9,30 @@ const instance = axios.create({
   baseURL: "https://jsonplaceholder.typicode.com",
 });
 
-const getPhotosService = async (params) => {
+const getPhotosService = async (params?: any): Promise<Photo[]> => {
   const response = await instance.get("/photos", { params });
   return response.data;
 };
 
-const getAlbumsService = async (params) => {
+const getAlbumsService = async (params?: any): Promise<Album[]> => {
   const response = await instance.get("/albums", { params });
   return response.data;
 };
 
-const getUsersService = async (params) => {
+const getUsersService = async (params?: any): Promise<User[]> => {
   const response = await instance.get("/users", { params });
   return response.data;
 };
 
 // Enrich photos with album and user information
-const enrichPhotos = (photos = [], albums = [], users = []) => {
-  const enrichedPhotos = photos.map((photo) => {
-    const album = albums.find((album) => album.id === photo.albumId);
-    const user = users.find((user) => user.id === album.userId);
+const enrichPhotos = (
+  photos: Photo[] = [],
+  albums: Album[] = [],
+  users: User[] = []
+) => {
+  const enrichedPhotos = photos.map((photo: Photo) => {
+    const album = albums.find((album: Album) => album.id === photo.albumId);
+    const user = users.find((user) => user.id === album?.userId);
 
     // Remove albumId property
     const { albumId, ...newPhoto } = photo;
@@ -43,9 +48,13 @@ const enrichPhotos = (photos = [], albums = [], users = []) => {
 
 // Filter based on provided parameters
 const filterPhotos = (
-  photos = [],
-  filters = { title: "", albumTitle: "", userEmail: "" }
-) => {
+  photos: Photo[] = [],
+  filters: { title: string; albumTitle: string; userEmail: string } = {
+    title: "",
+    albumTitle: "",
+    userEmail: "",
+  }
+): Photo[] => {
   const { title, albumTitle, userEmail } = filters || {};
 
   if (!title && !albumTitle && !userEmail) {
@@ -81,16 +90,12 @@ const filterPhotos = (
 };
 
 const paginatePhotos = (
-  photos = [],
-  filters = { offset: OFFSET, limit: LIMIT }
-) => {
+  photos: Photo[] = [],
+  filters: { offset: number; limit: number } = { offset: OFFSET, limit: LIMIT }
+): PhotoResponse => {
   const { limit, offset } = filters || {};
-  const parsedLimit = Number.isNaN(parseInt(limit, 10))
-    ? LIMIT
-    : parseInt(limit, 10);
-  const parsedOffset = Number.isNaN(parseInt(offset, 10))
-    ? OFFSET
-    : parseInt(offset, 10);
+  const parsedLimit = Number.isNaN(Number(limit)) ? LIMIT : Number(limit);
+  const parsedOffset = Number.isNaN(Number(offset)) ? OFFSET : Number(offset);
 
   // Apply pagination
   const startIndex = parsedOffset;
@@ -106,15 +111,21 @@ const paginatePhotos = (
 };
 
 // Get paginated photos based on filters sent by the user
-const getPhotos = async (
-  filters = {
+export const getPhotos = async (
+  filters: {
+    title: string;
+    "album.title": string;
+    "album.user.email": string;
+    limit: number;
+    offset: number;
+  } = {
     title: "",
     "album.title": "",
     "album.user.email": "",
     limit: LIMIT,
     offset: OFFSET,
   }
-) => {
+): Promise<PhotoResponse> => {
   // Parse query parameters for filtering and pagination
   const {
     title,
@@ -127,7 +138,7 @@ const getPhotos = async (
   const cacheKey = "enrichedPhotos";
 
   // Getting a cache value
-  const cachedPhotos = cache.get(cacheKey);
+  const cachedPhotos: Photo[] | undefined = cache.get(cacheKey);
 
   if (cachedPhotos) {
     // Filter based on the provided query parameters
@@ -153,13 +164,17 @@ const getPhotos = async (
   const [users, albums, photos] = responses;
 
   // Enrich photos with album and user information
-  const enrichedPhotos = enrichPhotos(photos, albums, users);
+  const enrichedPhotos = enrichPhotos(
+    photos as Photo[],
+    albums as Album[],
+    users as User[]
+  );
 
   // Setting cache value
   cache.set(cacheKey, enrichedPhotos);
 
   // Filter based on the provided query parameters
-  const filteredPhotos = filterPhotos(enrichedPhotos, {
+  const filteredPhotos = filterPhotos(enrichedPhotos as Photo[], {
     title,
     albumTitle,
     userEmail,
@@ -175,7 +190,7 @@ const getPhotos = async (
 };
 
 // Get photos based on id sent by the user
-const getPhoto = async (photoId) => {
+export const getPhoto = async (photoId: string) => {
   const id = Number(photoId);
   if (!id) {
     // Returns null if an invalid number is received
@@ -185,7 +200,7 @@ const getPhoto = async (photoId) => {
   const cacheKey = `photo__id${id}`;
 
   // Getting a cache value
-  const cachedPhotos = cache.get(cacheKey);
+  const cachedPhotos: Photo | undefined = cache.get(cacheKey);
 
   if (cachedPhotos) {
     return cachedPhotos;
@@ -242,5 +257,3 @@ const getPhoto = async (photoId) => {
   cache.set(cacheKey, enrichedPhoto);
   return enrichedPhoto;
 };
-
-module.exports = { getPhotos, getPhoto };

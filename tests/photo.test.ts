@@ -1,7 +1,9 @@
-require("@dotenvx/dotenvx").config();
-const request = require("supertest");
-const app = require("../server");
-const { mock_photo, mock_photos } = require("./mock_store");
+import { config } from "@dotenvx/dotenvx";
+import request from "supertest";
+import app from "../src/server";
+import { mock_photo, mock_photos } from "./mock_store";
+
+config();
 
 const requestInstance = request(app);
 

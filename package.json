@@ -4,8 +4,8 @@
   "description": "Relish API",
   "main": "index.js",
   "scripts": {
-    "start": "dotenvx run -f .env.development -- node src/server.js",
-    "test": "dotenvx run -f .env.testing -- jest src/tests",
+    "start": "dotenvx run -f .env.development -- ts-node src/server.ts",
+    "test": "dotenvx run -f .env.testing -- jest tests",
     "build": "dotenvx run -f .env.production -- netlify build"
   },
   "author": "Gerson Almeida",
@@ -19,8 +19,17 @@
     "serverless-http": "^3.2.0"
   },
   "devDependencies": {
+    "@netlify/functions": "^2.8.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
+    "@types/supertest": "^6.0.2",
     "jest": "^29.7.0",
     "netlify-cli": "^17.37.2",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
   }
 }
