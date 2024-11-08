@@ -1,11 +1,11 @@
 import { config } from "@dotenvx/dotenvx";
 import request from "supertest";
-import app from "../src/server";
+import { server } from "../src/server";
 import { mock_photo, mock_photos } from "./mock_store";
 
 config();
 
-const requestInstance = request(app);
+const requestInstance = request(server);
 
 describe("GET /externalapi/photos", () => {
   it("should return a list of photos", async () => {
@@ -32,4 +32,9 @@ describe("GET /externalapi/photos/:id", () => {
     expect(response.status).toBe(200);
     expect(response.body).toBeNull();
   });
+});
+
+// Close the server after all tests are completed
+afterAll((done) => {
+  server.close(done); // Ensures server is properly closed
 });
